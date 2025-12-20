@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  withings-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: withings-mcp-server
+    environment:
+      - WITHINGS_CLIENT_ID=${WITHINGS_CLIENT_ID}
+      - WITHINGS_CLIENT_SECRET=${WITHINGS_CLIENT_SECRET}
+      - WITHINGS_ACCESS_TOKEN=${WITHINGS_ACCESS_TOKEN}
+      - WITHINGS_REFRESH_TOKEN=${WITHINGS_REFRESH_TOKEN}
+      - WITHINGS_REDIRECT_URI=${WITHINGS_REDIRECT_URI:-http://localhost:8080/callback}
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge

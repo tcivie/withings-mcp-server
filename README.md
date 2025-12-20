@@ -13,6 +13,45 @@ An MCP (Model Context Protocol) server for integration with the Withings Health 
 
 ## Installation
 
+### Option 1: Docker (Recommended)
+
+1. **Create Withings API Credentials:**
+   - Go to [Withings Developer Dashboard](https://developer.withings.com/dashboard/)
+   - Create a new application
+   - Note your `Client ID` and `Client Secret`
+   - Set the Redirect URI to `http://localhost:8080/callback`
+
+2. **Configure environment variables:**
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit .env and add your credentials
+WITHINGS_CLIENT_ID=your_client_id_here
+WITHINGS_CLIENT_SECRET=your_client_secret_here
+WITHINGS_REDIRECT_URI=http://localhost:8080/callback
+```
+
+3. **Generate OAuth tokens:**
+```bash
+# First, install locally to run token generation
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+python generate_tokens.py
+```
+
+4. **Build and run with Docker:**
+```bash
+# Build the image
+docker build -t withings-mcp-server .
+
+# Run with docker-compose
+docker-compose up -d
+```
+
+### Option 2: Local Python Installation
+
 1. **Clone repository and install dependencies:**
 
 ```bash
@@ -208,11 +247,35 @@ To use the server with Claude Desktop, add the following to your MCP configurati
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
+### Docker Configuration
+
 ```json
 {
   "mcpServers": {
     "withings": {
-      "command": "python",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e", "WITHINGS_CLIENT_ID=your_client_id",
+        "-e", "WITHINGS_CLIENT_SECRET=your_client_secret",
+        "-e", "WITHINGS_ACCESS_TOKEN=your_access_token",
+        "-e", "WITHINGS_REFRESH_TOKEN=your_refresh_token",
+        "withings-mcp-server"
+      ]
+    }
+  }
+}
+```
+
+### Local Python Configuration
+
+```json
+{
+  "mcpServers": {
+    "withings": {
+      "command": "/path/to/.venv/bin/python",
       "args": ["-m", "withings_mcp_server"],
       "env": {
         "WITHINGS_CLIENT_ID": "your_client_id",
