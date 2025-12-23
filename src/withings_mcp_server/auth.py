@@ -42,14 +42,22 @@ class WithingsAuth:
 
     def _find_env_file(self) -> Path:
         """Find .env file in current directory or parent directories."""
+        # First try to find from project root (where server.py is installed)
+        project_root = Path(__file__).parent.parent.parent
+        project_env = project_root / ".env"
+        if project_env.exists():
+            return project_env
+
+        # Then try current directory and parent directories
         current = Path.cwd()
         while current != current.parent:
             env_path = current / ".env"
             if env_path.exists():
                 return env_path
             current = current.parent
-        # If not found, return .env in current directory
-        return Path.cwd() / ".env"
+
+        # If not found, return .env in project root (not cwd to avoid permission issues)
+        return project_env
 
     def get_authorization_url(self, scope: str = "user.info,user.metrics,user.activity") -> str:
         """Generate OAuth2 authorization URL."""
